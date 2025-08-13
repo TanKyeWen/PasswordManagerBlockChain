@@ -1,2 +1,3 @@
-npm run compile
-npm run node
+npx hardhat node
+
+npm run deploy:local
