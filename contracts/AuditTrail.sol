@@ -63,15 +63,71 @@ contract AuditTrail is Ownable {
         return true;
     }
     
+    // Get audit entry by LogID
+    function getAuditEntry(string memory _logID) public view returns (AuditEntry memory) {
+        require(bytes(auditEntries[_logID].logID).length > 0, "Audit entry does not exist");
+        return auditEntries[_logID];
+    }
+    
     // Get all audit entries for a user
-    function getUserAuditEntries(string memory _userID) public view returns (AuditEntry[] memory) {
-        string[] memory userLogIDs = userAuditEntries[_userID];
-        AuditEntry[] memory entries = new AuditEntry[](userLogIDs.length);
+    function getUserAuditEntries(string calldata _userID)
+        external
+        view
+        returns (AuditEntry[] memory)
+    {
+        // storage reference to avoid illegal storage->memory assignment
+        string[] storage ids = userAuditEntries[_userID];
+        uint256 n = ids.length;
+
+        AuditEntry[] memory entries = new AuditEntry[](n);
+        for (uint256 i = 0; i < n; i++) {
+            entries[i] = auditEntries[ids[i]];
+        }
+        return entries;
+    }
+    
+    // Get all LogIDs for a user
+    function getUserLogIDs(string memory _userID) public view returns (string[] memory) {
+        return userAuditEntries[_userID];
+    }
+    
+    // Get total number of audit entries
+    function getTotalAuditEntries() public view returns (uint256) {
+        return allLogIDs.length;
+    }
+    
+    // Get all LogIDs
+    function getAllLogIDs() public view returns (string[] memory) {
+        return allLogIDs;
+    }
+    
+    // Check if audit entry exists
+    function auditEntryExists(string memory _logID) public view returns (bool) {
+        return bytes(auditEntries[_logID].logID).length > 0;
+    }
+    
+    // Get audit entries by activity name
+    function getAuditEntriesByActivity(string memory _activityName) public view returns (AuditEntry[] memory) {
+        uint256 count = 0;
         
-        for (uint256 i = 0; i < userLogIDs.length; i++) {
-            entries[i] = auditEntries[userLogIDs[i]];
+        // First pass: count matching entries
+        for (uint256 i = 0; i < allLogIDs.length; i++) {
+            if (keccak256(abi.encodePacked(auditEntries[allLogIDs[i]].activityName)) == keccak256(abi.encodePacked(_activityName))) {
+                count++;
+            }
         }
         
-        return entries;
+        // Second pass: populate array
+        AuditEntry[] memory matchingEntries = new AuditEntry[](count);
+        uint256 index = 0;
+        
+        for (uint256 i = 0; i < allLogIDs.length; i++) {
+            if (keccak256(abi.encodePacked(auditEntries[allLogIDs[i]].activityName)) == keccak256(abi.encodePacked(_activityName))) {
+                matchingEntries[index] = auditEntries[allLogIDs[i]];
+                index++;
+            }
+        }
+        
+        return matchingEntries;
     }
 }
