@@ -12,7 +12,12 @@ npm i -D hardhat @nomicfoundation/hardhat-toolbox dotenv
 ```
 
 ```sh
-python start_up.py
+npx hardhat node
+```
+
+**IN ANOTHER TERMINAL**
+```sh
+npm run deploy:local
 ```
 
 ## Also Check Out
