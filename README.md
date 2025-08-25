@@ -11,10 +11,10 @@ npm init -y
 npm i -D hardhat @nomicfoundation/hardhat-toolbox dotenv
 ```
 
+### Project Start up
 ```sh
 npx hardhat node
 ```
-
 **IN ANOTHER TERMINAL**
 ```sh
 npm run deploy:local
